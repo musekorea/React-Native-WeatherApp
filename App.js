@@ -1,12 +1,47 @@
 import { StyleSheet, View, Text, ScrollView, Dimensions } from "react-native";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
 const ScreenWidth = Dimensions.get("window").width;
 const ScreenHeight = Dimensions.get("window").height;
+Location.setGoogleApiKey("AIzaSyAaA1obeZ7VuYSXkUn5MDYqruv9gAvTTHs");
 
 export default function App() {
+	const [locationOK, setLocationOK] = useState(true);
+	const [city, setCity] = useState("Loading...");
+
+	const askLocationPermission = async () => {
+		try {
+			const status = await Location.requestForegroundPermissionsAsync();
+			if (!status.granted) {
+				setLocationOK(false);
+				console.log("승인거부");
+			}
+			setLocationOK(true);
+			const coordinate = await Location.getCurrentPositionAsync({
+				accuracy: 5,
+			});
+			const latitude = coordinate.coords.latitude;
+			const longitude = coordinate.coords.longitude;
+			const locationData = await Location.reverseGeocodeAsync(
+				{
+					latitude,
+					longitude,
+				},
+				{ useGoogleMaps: false }
+			);
+			console.log(locationData[0].city);
+			setCity(locationData[0].city);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	useEffect(() => {
+		askLocationPermission();
+	}, []);
 	return (
 		<View style={styles.container}>
 			<View style={styles.city}>
-				<Text style={styles.cityName}>Seoul</Text>
+				<Text style={styles.cityName}>{city}</Text>
 			</View>
 			<ScrollView
 				horizontal
@@ -42,7 +77,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 	},
-	cityName: { fontSize: 58, fontWeight: "600" },
+	cityName: { fontSize: 40, fontWeight: "600" },
 	weather: { backgroundColor: "teal" },
 	day: {
 		width: ScreenWidth,
