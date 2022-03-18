@@ -9,12 +9,12 @@ import {
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 const ScreenWidth = Dimensions.get("window").width;
-const ScreenHeight = Dimensions.get("window").height;
+//const ScreenHeight = Dimensions.get("window").height;
 const Weather_API_Key = "08534ac244fcfd168c6f362552431a93";
 Location.setGoogleApiKey("AIzaSyAaA1obeZ7VuYSXkUn5MDYqruv9gAvTTHs");
 
 export default function App() {
-	const [locationOK, setLocationOK] = useState(true);
+	const [locationOK, setLocationOK] = useState(true); //사용하지는 않았음
 	const [city, setCity] = useState("Loading...");
 	const [daily, setDaily] = useState([]);
 
@@ -38,10 +38,11 @@ export default function App() {
 				},
 				{ useGoogleMaps: false }
 			);
+			console.log(locationData);
 			setCity(locationData[0].city);
 
 			const getWeather = await fetch(
-				`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=minutely,hourly,alerts&appid=${Weather_API_Key}&units=metric`
+				`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=minutely,hourly,alerts&appid=${Weather_API_Key}&units=metric&lang=zh_cn`
 			);
 			const jsonWeather = await getWeather.json();
 			setDaily(jsonWeather.daily);
@@ -73,15 +74,15 @@ export default function App() {
 					</View>
 				) : (
 					daily.map((day, index) => {
-						const unixTime = day.dt;
-						const date = new Date(unixTime * 1000).getDate();
 						let temp = day.temp.day;
 						temp = parseFloat(temp).toFixed(1);
+						const unixTime = day.dt;
+						const date = new Date(unixTime * 1000).toString().substring(0, 10);
 						return (
 							<View key={index} style={styles.day}>
 								<Text style={styles.temp}>{temp}º</Text>
 								<Text style={styles.desc}>{day.weather[0].description}</Text>
-								<Text style={styles.desc}>{date}日</Text>
+								<Text style={styles.desc}>{date}</Text>
 							</View>
 						);
 					})
@@ -118,5 +119,5 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		marginBottom: 10,
 	},
-	footer_text: { fontSize: 20, textAlign: "right" },
+	footer_text: { fontSize: 20, textAlign: "right", marginRight: 10 },
 });
